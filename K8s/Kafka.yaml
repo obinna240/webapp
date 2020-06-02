@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kafkaApp
+  name: kafka
+spec:
+  ports:
+    - port: 9092
+      targetPort: 9092
+      protocol: TCP
+      name: tcp1
+    - port: 2181
+      name: http1
+      targetPort: 2181
+  selector:
+    app: kafkaApp
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafkaApp
+  name: kafka-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: kafkaApp
+  template:
+    metadata:
+      labels:
+        app: kafkaApp
+    spec:
+      containers:
+        - name: zk1
+          image: "wurstmeister/kafka"
+          ports:
+            - containerPort: 2181
+          command:
+            - zookeeper-server-start.sh
+            - /config/zookeeper.properties
